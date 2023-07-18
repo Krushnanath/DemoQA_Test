@@ -282,7 +282,7 @@ test.only("Table Delete button Functionality", async ({ page }) => {
   afterTableData.shift();
   console.log("After new row add: ",afterTableData);
 
-  //editing the same table entry salary
+  
 
   // finding out the element row number with name Test to be Deleted
 
@@ -315,6 +315,76 @@ test.only("Table Delete button Functionality", async ({ page }) => {
 
   expect(afterDeleteTableData.includes("Test")).toBeFalsy();
   expect(afterTableData.length-1 === afterDeleteTableData.length).toBeTruthy();
+
+
+});
+
+//////// Test and examine the table serach functionality  //////////
+
+test.only('Table Search Test', async({page}) =>{
+
+  await page.goto("https://demoqa.com/webtables");
+
+  await expect(page.locator(".main-header")).toHaveText("Web Tables");
+
+  /// Checking all table first column all data
+  let tableData = await page
+    .locator(
+      "//div[@class='ReactTable -striped -highlight']//div[@role='row']/div[1]"
+    )
+    .allTextContents();
+  tableData = tableData.filter((item) => item.trim() !== ""); /// removing empty elements
+  tableData.shift(); //// removing fist element as it is header.
+  console.log(tableData);
+
+  //adding new row
+  await page.locator("//button[@id='addNewRecordButton']").click();
+  await page.locator("//input[@id='firstName']").type("Test");
+  await page.locator("//input[@id='lastName']").type("Name");
+  await page.locator("//input[@id='userEmail']").type("testname@test.com");
+  await page.locator("//input[@id='age']").type("20");
+  await page.locator("//input[@id='salary']").type("30000");
+  await page.locator("//input[@id='department']").type("Comp");
+  await page.locator("//button[@id='submit']").click();
+
+  // adding one more row
+  await page.locator("//button[@id='addNewRecordButton']").click();
+  await page.locator("//input[@id='firstName']").type("TestName");
+  await page.locator("//input[@id='lastName']").type("Name");
+  await page.locator("//input[@id='userEmail']").type("testname@test.com");
+  await page.locator("//input[@id='age']").type("21");
+  await page.locator("//input[@id='salary']").type("50000");
+  await page.locator("//input[@id='department']").type("IT");
+  await page.locator("//button[@id='submit']").click();
+
+  /// checking again table data if new value is appered in row
+
+  let afterTableData = await page
+    .locator(
+      "//div[@class='ReactTable -striped -highlight']//div[@role='row']/div[1]"
+    )
+    .allTextContents();
+  afterTableData = afterTableData.filter((item) => item.trim() !== "");
+  afterTableData.shift();
+  console.log("After new row add: ",afterTableData);
+///starting search 
+
+  await page.locator("//input[@id='searchBox']").type("test",{delay :200});
+  let afterSearchData = await page.locator("//div[@class='ReactTable -striped -highlight']//div[@role='row']/div[1]").allTextContents();
+  afterSearchData = afterSearchData.filter((item) => item.trim() !== "");
+  afterSearchData.shift();
+  console.log("After search : ",afterSearchData);
+  let flag = false;
+  afterSearchData.forEach(element => {
+    
+    if(element.toLowerCase().includes("test")){
+      flag= true;
+    }else{
+      flag =false;
+    }
+    
+  });
+  expect(flag).toBeTruthy();
 
 
 });
