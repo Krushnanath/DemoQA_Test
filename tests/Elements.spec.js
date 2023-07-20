@@ -8,7 +8,7 @@ test("has title", async ({ page }) => {
   await expect(page).toHaveTitle(/DEMOQA/);
 });
 
-//////////  Verify and check text box element functionality  ////////////
+//////////  Verify and check text box element functionality  //////////////////////////
 
 test("Text Box Test", async ({ page }) => {
   await page.goto("https://demoqa.com");
@@ -48,7 +48,7 @@ test("Text Box Test", async ({ page }) => {
   );
 });
 
-//////////  Verify and Test Check Box element funcationality   //////////////
+//////////  Verify and Test Check Box element funcationality   ////////////////////////
 
 test("Check Box Test", async ({ page }) => {
   await page.goto("https://demoqa.com/elements");
@@ -90,11 +90,12 @@ test("Check Box Test", async ({ page }) => {
   const result = await page.locator("//div[@id='result']").textContent();
   console.log("Selection: ", selection, "Result: ", result);
   for (let i = 0; i < selection.length; i++) {
+    // @ts-ignore
     expect(result.toLocaleLowerCase()).toContain(selection[i].toLowerCase());
   }
 });
 
-/////////// Test and examine the Radio button  /////////////
+/////////// Test and examine the Radio button  /////////////////////////////
 
 test("Radio Buttons Test", async ({ page }) => {
   await page.goto("https://demoqa.com/radio-button");
@@ -121,7 +122,7 @@ test("Radio Buttons Test", async ({ page }) => {
   await expect(disabledRadio).toBeTruthy();
 });
 
-////////////// Verify and examine Web Tables functionality  //////////
+////////////// Verify and examine Web Tables functionality  ////////////////////////
 
 test("Web Tables Test", async ({ page }) => {
   await page.goto("https://demoqa.com/webtables");
@@ -160,7 +161,7 @@ test("Web Tables Test", async ({ page }) => {
   expect(tableData.length + 1).toEqual(afterTableData.length);
 });
 
-////// Verify table edit functionality  /////////////////
+////// Verify table edit functionality  /////////////////////////////////////
 
 test("Table Edit Function", async ({ page }) => {
   await page.goto("https://demoqa.com/webtables");
@@ -245,7 +246,7 @@ test("Table Edit Function", async ({ page }) => {
   expect(updatedSalary[0]).toEqual("50000");
 });
 
-/// Verifying  Delete button functionality  //////
+/////////// Verifying  Delete button functionality  ////////////////////////
 
 test("Table Delete button Functionality", async ({ page }) => {
   await page.goto("https://demoqa.com/webtables");
@@ -319,7 +320,7 @@ test("Table Delete button Functionality", async ({ page }) => {
 
 });
 
-//////// Test and examine the table serach functionality  //////////
+//////// Test and examine the table serach functionality  /////////////////////
 
 test('Table Search Test', async({page}) =>{
 
@@ -389,9 +390,9 @@ test('Table Search Test', async({page}) =>{
 
 });
 
-/////// Test and Examine the buttons different clicks functionality  ///////////////////
+/////// Test and Examine the buttons different clicks functionality  ////////////////////
 
-test.only('Button Clicks Test', async({page}) =>{
+test('Button Clicks Test', async({page}) =>{
 
   await page.goto("https://demoqa.com/buttons");
 
@@ -417,4 +418,86 @@ test.only('Button Clicks Test', async({page}) =>{
 
 
 });
+
+
+////////////////////// Test and Verify the links there functionality //////////////////
+
+
+test.only('Test the different links functionality', async({page}) => {
+
+  await page.goto("https://demoqa.com/links");
+
+  await expect(page.locator(".main-header")).toHaveText("Links");
+  
+  // tesing simple link that opens new tab 
+  // Get the current window.
+  const currentPage =  page;
+
+  // Get the promise for the popup event.
+  const page1Promise = page.waitForEvent('popup');
+  // now clicking on the desired link
+  await page.locator("//a[@id='simpleLink']").click();
+  // Get the popup window.
+  const page1 = await page1Promise;
+  
+  //checking if the new window tab opened
+  let flag = false;
+  if(currentPage !== page1){
+    flag = true;
+  }else{
+    flag = false;
+  }
+  expect(flag).toBeTruthy();
+  console.log(currentPage.url()," and ", page1.url());
+
+  /// checking links that sends the API call 
+  
+  // intercept the api call
+  await page.route('**/created',(route) => {
+
+    route.fulfill({
+      status :201,
+      // @ts-ignore
+      statusText :'Created',
+    });
+  });
+
+  await page.locator("//a[@id='created']").click();
+  const messageText = await page.locator("//p[@id='linkResponse']").textContent();
+  expect(messageText).toContain("Link has responded with staus 201 and status text Created");
+  // next link to test  
+  /// below part is neccesory for the creating simulated responce that actual site gives. needed for playwright.
+  await page.route('**/no-content',(route) => {
+
+    route.fulfill({
+      status : 204, 
+      // @ts-ignore
+      statusText :'No Content',
+
+
+    });
+  });
+
+  await page.locator("//a[@id='no-content']").click();
+  let message = await page.locator("//p[@id='linkResponse']").textContent();
+  expect(message).toContain("Link has responded with staus 204 and status text No Content");
+ 
+  /// next link to be checked:
+  await page.route('**/moved',(route) => {
+    route.fulfill({
+      status :301,
+      // @ts-ignore
+      statusText : 'Moved Permanently',
+
+    });
+
+  });
+
+  await page.locator("//a[@id='moved']").click();
+  expect(await page.locator("//p[@id='linkResponse']").textContent()).toContain("Link has responded with staus 301 and status text Moved Permanently");
+
+});
+
+
+
 
