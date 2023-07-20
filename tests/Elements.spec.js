@@ -247,7 +247,7 @@ test("Table Edit Function", async ({ page }) => {
 
 /// Verifying  Delete button functionality  //////
 
-test.only("Table Delete button Functionality", async ({ page }) => {
+test("Table Delete button Functionality", async ({ page }) => {
   await page.goto("https://demoqa.com/webtables");
 
   await expect(page.locator(".main-header")).toHaveText("Web Tables");
@@ -321,7 +321,7 @@ test.only("Table Delete button Functionality", async ({ page }) => {
 
 //////// Test and examine the table serach functionality  //////////
 
-test.only('Table Search Test', async({page}) =>{
+test('Table Search Test', async({page}) =>{
 
   await page.goto("https://demoqa.com/webtables");
 
@@ -388,3 +388,33 @@ test.only('Table Search Test', async({page}) =>{
 
 
 });
+
+/////// Test and Examine the buttons different clicks functionality  ///////////////////
+
+test.only('Button Clicks Test', async({page}) =>{
+
+  await page.goto("https://demoqa.com/buttons");
+
+  await expect(page.locator(".main-header")).toHaveText("Buttons");
+/// checking the doubleClcik functionality.
+  await page.locator("//button[@id='doubleClickBtn']").dblclick();
+
+  //checking the message appearred or not
+   expect((await page.locator("//p[@id='doubleClickMessage']").allTextContents())).toContain("You have done a double click");
+
+   //cheking right click functionality
+
+   await page.locator("//button[@id='rightClickBtn']").click({button: "right"});
+   expect(await page.locator("//p[@id='rightClickMessage']").allTextContents()).toContain("You have done a right click");
+
+  //Dynamic id buttons  click functionality check
+    // const buttonText = "Click Me";
+    // await page.locator(`button:has-text("${buttonText}")`).nth(2).click();  or simple is below
+    await page.locator("//button[@class='btn btn-primary']").nth(2).click(); // as it is third button
+    // you can use nth of last too as it is las button too.
+    
+    expect(await page.locator("//p[@id='dynamicClickMessage']").allTextContents()).toContain("You have done a dynamic click");
+
+
+});
+
