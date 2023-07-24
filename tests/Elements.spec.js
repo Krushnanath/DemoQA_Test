@@ -519,6 +519,7 @@ test.only("Test Broken links and Image", async ({ page }) => {
   console.log(imageSrcs);
   // now we are removing the imgages like advertising images
   const filteredImageSrcs = imageSrcs.filter(
+    // @ts-ignore
     (element) => !element.includes("ad")
   );
   console.log(filteredImageSrcs);
@@ -545,11 +546,13 @@ test.only("Test Broken links and Image", async ({ page }) => {
       return item.map((item) => item.getAttribute("src"));
     });
     let newPageImageSrcs = newPageSrc.filter(
+      // @ts-ignore
       (element) => !element.includes("ad")
     );
     console.log("New page", newPageImageSrcs);
     // checking that image src is present in the new tab
 
+    // @ts-ignore
     if (newPageImageSrcs.some((src) => element.includes(src))) {
       imageResult.push("true");
       console.log(element, " is valid image");
