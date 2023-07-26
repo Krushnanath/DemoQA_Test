@@ -572,7 +572,7 @@ test("Test Broken links and Image", async ({ page }) => {
 });
 
 ////////////////// Check and Verify the Download and upload functionality //////////////
-test.only('Test Download and upload button', async ({ page }) => {
+test('Test Download and upload button', async ({ page }) => {
   await page.goto('https://demoqa.com/upload-download');
 
   await expect(page.locator('.main-header')).toHaveText('Upload and Download');
@@ -595,4 +595,28 @@ test.only('Test Download and upload button', async ({ page }) => {
 
   // Add an assertion to check if the download has started
   expect(download).toBeTruthy();
+});
+
+/////////////////// Test and verify upload file functionality /////////////////
+
+test.only('Test Upload file functionality', async ({page}) => {
+
+  await page.goto("https://demoqa.com/upload-download"); // Replace this with the URL of your website
+
+  const fileInput = await page.locator("//input[@id='uploadFile']");
+  expect(await fileInput.isVisible()).toBe(true);
+  expect(await fileInput.isEnabled()).toBe(true);
+
+  // Set the file path for upload
+  const filePath = "c:/Users/krushnath.dhongade/Downloads/sampleFile.JPEG"; // Replace this with the actual file path
+  await page.setInputFiles("//input[@id='uploadFile']", filePath);
+
+  // Wait for the file upload to complete (you may need to adjust the waiting condition based on the behavior of the website)
+  await page.waitForTimeout(5000); // Wait for 5 seconds (adjust as needed)
+
+  // Assert that the file upload is successful (you may need to check for specific changes on the page or some success message)
+  // For example, if there is a success message displayed after the upload, you can use the following assertion:
+  const successMessage = await page.locator("//p[@id='uploadedFilePath']");
+  expect(await successMessage.isVisible()).toBe(true);
+  
 });
