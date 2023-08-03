@@ -1,26 +1,28 @@
-// @ts-check
 const { test, expect } = require("@playwright/test");
+const { DemoqaPage } = require("../pageObjects/demoqaPage");
+const { CheckBox } = require("../pageObjects/checkBox");
+const { RadioButton } = require("../pageObjects/RadioButton");
+
 
 test("has title", async ({ page }) => {
-  await page.goto("https://demoqa.com");
+  const demoqaPage = new DemoqaPage(page);
+  await demoqaPage.gotoHomePage();
 
   // Expect a title "to contain" a substring.
   await expect(page).toHaveTitle(/DEMOQA/);
 });
 
-//////////  Verify and check text box element functionality  //////////////////////////
-
 test("Text Box Test", async ({ page }) => {
-  await page.goto("https://demoqa.com");
-  page.pause();
-  const elemetsBlock = page.locator("(//h5)[1]");
-  await elemetsBlock.click();
-  await page.getByText("Text Box").click();
-  await expect(page.locator(".main-header")).toContainText(/Text Box/);
-  const nameInput = await page.locator("#userName");
-  const emailInput = page.locator("#userEmail");
-  const currentAddress = page.locator("#currentAddress");
-  const permanentAddress = page.locator("#permanentAddress");
+  const demoqaPage = new DemoqaPage(page);
+  await demoqaPage.gotoHomePage();
+  await demoqaPage.gotoElementsBlock();
+  await demoqaPage.gotoTextBox();
+  const mainheadertext = await demoqaPage.getMainHeader();
+  await expect(mainheadertext).toContain("Text Box");
+  const nameInput = await demoqaPage.getTextBoxInput();
+  const emailInput = await demoqaPage.getEmailInput();
+  const currentAddress = await demoqaPage.getCurrentAddressInput();
+  const permanentAddress = await demoqaPage.getPermanentAddressInput();
   await expect(emailInput).toHaveAttribute("placeholder", /name@example.com/);
   await expect(currentAddress).toHaveAttribute(
     "placeholder",
@@ -34,8 +36,7 @@ test("Text Box Test", async ({ page }) => {
   await currentAddress.type("At Pune");
   await permanentAddress.click();
   await permanentAddress.type("At VimanNager");
-  await page.locator("#submit").click();
-
+  await demoqaPage.getSubmitButton();
   await expect(page.locator("//p[@id='name']")).toContainText(/Name:Test Name/);
   await expect(page.locator("//p[@id='email']")).toContainText(
     /Email:testName@test.com/
@@ -54,72 +55,41 @@ test("Check Box Test", async ({ page }) => {
   await page.goto("https://demoqa.com/elements");
   await page.getByText(/Check Box/).click();
   await expect(page.locator(".main-header")).toContainText(/Check Box/);
-  await page.locator(".rct-icon.rct-icon-expand-close").click();
-  await page
-    .locator("(//*[name()='svg'][@class='rct-icon rct-icon-expand-close'])[1]")
-    .click();
-  await page
-    .locator("(//*[name()='svg'][@class='rct-icon rct-icon-expand-close'])[1]")
-    .click();
-  await page
-    .locator("(//*[name()='svg'][@class='rct-icon rct-icon-expand-close'])[1]")
-    .click();
-  await page
-    .locator("(//*[name()='svg'][@class='rct-icon rct-icon-expand-close'])[1]")
-    .click();
-  //await page.pause();
-  await page
-    .locator("(//*[name()='svg'][@class='rct-icon rct-icon-expand-close'])[1]")
-    .click();
-  const selection = [
-    "Desktop",
-    "Notes",
-    "Commands",
-    "React",
-    "Classified",
-    "General",
-    "excelFile",
-  ];
+  const checkBox = new CheckBox(page);
+  await checkBox.expandAllToggle();
   await page.getByText("Desktop").click();
   await page.getByText("React").click();
   await page.getByText("Classified").click();
   await page.getByText("General").click();
-  await page
-    .locator("(//*[name()='svg'][@class='rct-icon rct-icon-uncheck'])[7]")
-    .click();
-  const result = await page.locator("//div[@id='result']").textContent();
-  console.log("Selection: ", selection, "Result: ", result);
-  for (let i = 0; i < selection.length; i++) {
-    // @ts-ignore
-    expect(result.toLocaleLowerCase()).toContain(selection[i].toLowerCase());
-  }
+  await page.getByText("Excel File").click();
+
+  const matchingResult = await checkBox.matchWithSelection();
+  console.log(matchingResult);
+  expect(matchingResult).toBeTruthy();
 });
 
 /////////// Test and examine the Radio button  /////////////////////////////
 
-test("Radio Buttons Test", async ({ page }) => {
+test.only("Radio Buttons Test", async ({ page }) => {
   await page.goto("https://demoqa.com/radio-button");
 
-  await expect(page.locator(".main-header")).toContainText("Radio Button");
+  const radioButton = new RadioButton(page);
+  const mainHeader = await radioButton.getMainHeader();
+  expect(mainHeader).toContain("Radio Button");
   // await page.pause();
 
-  await page.locator("//label[normalize-space()='Yes']").click();
-
-  await expect(page.locator("//input[@id='yesRadio']")).toBeChecked();
-  const chk1 = await page.locator("//span[@class='text-success']");
-  await expect(chk1).toContainText("Yes");
-  await page.locator("//label[@for='impressiveRadio']").click();
-  await expect(page.locator("//input[@id='impressiveRadio']")).toBeChecked();
-  await expect(await page.locator("//p[@class='mt-3']")).toContainText(
-    "Impressive"
-  );
-
-  // await page.locator("input[type='radio']").nth(2).click();
-  const disabledRadio = await page
-    .locator("input[type='radio']")
-    .nth(2)
-    .isDisabled();
-  await expect(disabledRadio).toBeTruthy();
+  await radioButton.checkYesRadio();
+  let ischecked = await radioButton.isYesRadiochecked();
+  await expect(ischecked).toBeChecked();
+  let successText = await radioButton.getSuccessText();
+  await expect(successText).toContainText("Yes");
+  await radioButton.checkImpressiveRadio();
+  ischecked = await radioButton.isImpressiveRadiochecked();
+  await expect(ischecked).toBeChecked();
+  successText = await radioButton.getSuccessText();
+  await expect(successText).toContainText("Impressive");
+  const isDisabled = await radioButton.isNoRadioDisabled();
+  await expect(isDisabled).toBeTruthy();
 });
 
 ////////////// Verify and examine Web Tables functionality  ////////////////////////
@@ -620,7 +590,7 @@ test("Test Upload file functionality", async ({ page }) => {
 
 ///////////////////// Test and verify Form functionality  //////////////////////////
 
-test.only("Test Form opertaions", async ({ page }) => {
+test("Test Form opertaions", async ({ page }) => {
   await page.goto("https://demoqa.com/automation-practice-form");
 
   await expect(page.locator(".main-header")).toHaveText("Practice Form");
@@ -714,11 +684,12 @@ test.only("Test Form opertaions", async ({ page }) => {
   // asserting each value for each array comparison
   const isEqual = JSON.stringify(input) === JSON.stringify(resultInput);
   console.log(isEqual);
-  console.log(input,resultInput);
+  console.log(input, resultInput);
   expect(isEqual).toBeTruthy();
   //assertion for values entered
-  const isEqualValues = JSON.stringify(inputValues) === JSON.stringify(resultInputValues);
+  const isEqualValues =
+    JSON.stringify(inputValues) === JSON.stringify(resultInputValues);
   console.log(isEqualValues);
-  console.log(inputValues,resultInputValues);
+  console.log(inputValues, resultInputValues);
   expect(isEqualValues).toBeTruthy();
 });

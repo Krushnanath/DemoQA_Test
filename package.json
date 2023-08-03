@@ -8,9 +8,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@playwright/test": "^1.36.1"
+    "@playwright/test": "^1.36.1",
+    "allure-playwright": "^2.4.0"
   },
   "dependencies": {
-    "@cucumber/cucumber": "^9.3.0"
+    "@cucumber/cucumber": "^9.3.0",
+    "expect.js": "^0.3.1"
   }
 }
