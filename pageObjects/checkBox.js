@@ -2,6 +2,7 @@
 
 class CheckBox {
   constructor(page) {
+    this.page =page;
     this.expandIcon = page.locator(
       "(//*[name()='svg'][@class='rct-icon rct-icon-expand-close'])[1]"
     );

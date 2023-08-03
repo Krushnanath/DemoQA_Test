@@ -1,6 +1,7 @@
 class RadioButton {
     constructor(page){
 
+        this.page = page;
         this.mainHeader = page.locator(".main-header");
         this.yesRadioButton = page.locator("//label[normalize-space()='Yes']");
         this.afterClickYesRadio = page.locator("//input[@id='yesRadio']");

@@ -2,6 +2,7 @@ const { test, expect } = require("@playwright/test");
 const { DemoqaPage } = require("../pageObjects/demoqaPage");
 const { CheckBox } = require("../pageObjects/checkBox");
 const { RadioButton } = require("../pageObjects/RadioButton");
+const { Table } = require("../pageObjects/TablePage");
 
 
 test("has title", async ({ page }) => {
@@ -70,7 +71,7 @@ test("Check Box Test", async ({ page }) => {
 
 /////////// Test and examine the Radio button  /////////////////////////////
 
-test.only("Radio Buttons Test", async ({ page }) => {
+test("Radio Buttons Test", async ({ page }) => {
   await page.goto("https://demoqa.com/radio-button");
 
   const radioButton = new RadioButton(page);
@@ -95,125 +96,43 @@ test.only("Radio Buttons Test", async ({ page }) => {
 ////////////// Verify and examine Web Tables functionality  ////////////////////////
 
 test("Web Tables Test", async ({ page }) => {
-  await page.goto("https://demoqa.com/webtables");
 
-  await expect(page.locator(".main-header")).toHaveText("Web Tables");
-
+  const tables = new Table(page);
+  const url = "https://demoqa.com/webtables";
+  await tables.gotoPage(url);
+  const mainHeader = await tables.getMainHeader();
+  await expect(mainHeader).toHaveText("Web Tables");
   /// Checking all table first column all data
-  let tableData = await page
-    .locator(
-      "//div[@class='ReactTable -striped -highlight']//div[@role='row']/div[1]"
-    )
-    .allTextContents();
-  tableData = tableData.filter((item) => item.trim() !== ""); /// removing empty elements
-  tableData.shift(); //// removing fist element as it is header.
-  console.log(tableData);
-
-  //adding new row
-  await page.locator("//button[@id='addNewRecordButton']").click();
-  await page.locator("//input[@id='firstName']").type("Test");
-  await page.locator("//input[@id='lastName']").type("Name");
-  await page.locator("//input[@id='userEmail']").type("testname@test.com");
-  await page.locator("//input[@id='age']").type("20");
-  await page.locator("//input[@id='salary']").type("30000");
-  await page.locator("//input[@id='department']").type("Comp");
-  await page.locator("//button[@id='submit']").click();
-  /// checking again table data if new value is appered in row
-
-  let afterTableData = await page
-    .locator(
-      "//div[@class='ReactTable -striped -highlight']//div[@role='row']/div[1]"
-    )
-    .allTextContents();
-  afterTableData = afterTableData.filter((item) => item.trim() !== "");
-  afterTableData.shift();
-  console.log("New table data : ", afterTableData);
-  expect(tableData.length + 1).toEqual(afterTableData.length);
+  const initialFirstColumnData = await tables.getFirstColumnData();
+  console.log("Initial Table Data: ",initialFirstColumnData);
+  // Adding new Row to the Table
+  await tables.addNewRecord();
+  // checking again table data if new value is appered in row
+  const afterFirstColumnData = await tables.getFirstColumnData();
+  console.log("After add new Record, Table Data: ",afterFirstColumnData);
+  expect(initialFirstColumnData.length + 1).toEqual(afterFirstColumnData.length);
 });
 
 ////// Verify table edit functionality  /////////////////////////////////////
 
-test("Table Edit Function", async ({ page }) => {
+test.only("Table Edit Function", async ({ page }) => {
   await page.goto("https://demoqa.com/webtables");
-
-  await expect(page.locator(".main-header")).toHaveText("Web Tables");
-
+  const tables = new Table(page);
+  const mainHeader = await tables.getMainHeader();
+  await expect(mainHeader).toHaveText("Web Tables");
   /// Checking all table first column all data
-  let tableData = await page
-    .locator(
-      "//div[@class='ReactTable -striped -highlight']//div[@role='row']/div[1]"
-    )
-    .allTextContents();
-  tableData = tableData.filter((item) => item.trim() !== ""); /// removing empty elements
-  tableData.shift(); //// removing fist element as it is header.
-  console.log(tableData);
-
-  //adding new row
-  await page.locator("//button[@id='addNewRecordButton']").click();
-  await page.locator("//input[@id='firstName']").type("Test");
-  await page.locator("//input[@id='lastName']").type("Name");
-  await page.locator("//input[@id='userEmail']").type("testname@test.com");
-  await page.locator("//input[@id='age']").type("20");
-  await page.locator("//input[@id='salary']").type("30000");
-  await page.locator("//input[@id='department']").type("Comp");
-  await page.locator("//button[@id='submit']").click();
-  /// checking again table data if new value is appered in row
-
-  let afterTableData = await page
-    .locator(
-      "//div[@class='ReactTable -striped -highlight']//div[@role='row']/div[1]"
-    )
-    .allTextContents();
-  afterTableData = afterTableData.filter((item) => item.trim() !== "");
-  afterTableData.shift();
-
-  //editing the same table entry salary
-
-  // finding out the element with name Test to be edited
-
-  let check = [];
-  let resultRow = 0;
-
-  // for (let i = 1; i <= afterTableData.length; i++) {
-  //   const checkHandle = await page.evaluateHandle(
-  //     (i) => document.querySelector(`div.rt-tbody > div.rt-tr-group:nth-child(${i}) > div[role="row"] > div:nth-child(1)`),
-  //     i
-  //   );
-
-  //   // Check if the handle has textContent (is an ElementHandle)
-  //   const checkValue = (await checkHandle.getProperty('textContent')).toString();
-
-  //   if (checkValue === "Test") {
-  //     resultRow = i;
-  //     break; // Assuming you want to stop the loop if "Test" is found in any row.
-  //   }
-
-  //   await checkHandle.dispose();
-  // }
-
-  for (let i = 1; i <= afterTableData.length; i++) {
-    check = await page
-      .locator(
-        `div.rt-tbody > div.rt-tr-group:nth-child(${i}) > div[role="row"] > div:nth-child(1)`
-      )
-      .allTextContents();
-    if (check[0] == "Test") {
-      resultRow = i;
-      break;
-    }
-  }
-
-  console.log(resultRow);
-  //clicking on edit button
-  await page.locator(`//span[@id='edit-record-${resultRow}']`).click();
-  await page.locator("//input[@id='salary']").fill("50000");
-  await page.locator("//button[@id='submit']").click();
-  let updatedSalary = await page
-    .locator(
-      `div.rt-tbody > div.rt-tr-group:nth-child(${resultRow}) > div[role="row"] > div:nth-child(5)`
-    )
-    .allTextContents();
-  expect(updatedSalary[0]).toEqual("50000");
+  const initialFirstColumnData = await tables.getFirstColumnData();
+  console.log("Initial Table Data: ",initialFirstColumnData);
+  await tables.addNewRecord();
+  const afterFirstColumnData = await tables.getFirstColumnData();
+  console.log("After Row Addingtion: ",afterFirstColumnData);
+  const newSalaray = "50000";
+  // we are editing the record with name test finding respective record
+  const recordNumber = await tables.findOutRowNum(afterFirstColumnData);
+  //editing respective record with new Salaray
+  await tables.editRow(recordNumber, newSalaray);
+  const updatedSalary = await tables.getUpdatedSalary(recordNumber);
+  expect(updatedSalary[0]).toEqual(newSalaray);
 });
 
 /////////// Verifying  Delete button functionality  ////////////////////////
