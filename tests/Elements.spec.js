@@ -3,6 +3,7 @@ const { DemoqaPage } = require("../pageObjects/demoqaPage");
 const { CheckBox } = require("../pageObjects/checkBox");
 const { RadioButton } = require("../pageObjects/RadioButton");
 const { Table } = require("../pageObjects/TablePage");
+const { Buttons } = require("../pageObjects/ButtonsPage");
 
 
 test("has title", async ({ page }) => {
@@ -165,7 +166,7 @@ test("Table Delete button Functionality", async ({ page }) => {
 
 //////// Test and examine the table serach functionality  /////////////////////
 
-test.only("Table Search Test", async ({ page }) => {
+test("Table Search Test", async ({ page }) => {
 
   const tables = new Table(page);
   await page.goto("https://demoqa.com/webtables");
@@ -196,36 +197,32 @@ test.only("Table Search Test", async ({ page }) => {
 
 /////// Test and Examine the buttons different clicks functionality  ////////////////////
 
-test("Button Clicks Test", async ({ page }) => {
+test.only("Button Clicks Test", async ({ page }) => {
   await page.goto("https://demoqa.com/buttons");
-
-  await expect(page.locator(".main-header")).toHaveText("Buttons");
+  const buttons = new Buttons(page);
+  const requiredDblClickMessage = "You have done a double click";
+  const requiredRightClkMessage = "You have done a right click";
+  const requiredDynamicButtonClkMessage = "You have done a dynamic click"
+  const mainHeader = await buttons.getMainHeader();
+  //checking we are on right page.
+  await expect(mainHeader).toHaveText("Buttons");
   /// checking the doubleClcik functionality.
-  await page.locator("//button[@id='doubleClickBtn']").dblclick();
-
-  //checking the message appearred or not
-  expect(
-    await page.locator("//p[@id='doubleClickMessage']").allTextContents()
-  ).toContain("You have done a double click");
-
+  await buttons.performDoubleClick();
+  const dblClickMessage = await buttons.getdblClickMessage();
+  //checking the message appearred or not 
+  expect(dblClickMessage).toContain(requiredDblClickMessage);
   //cheking right click functionality
-
-  await page
-    .locator("//button[@id='rightClickBtn']")
-    .click({ button: "right" });
-  expect(
-    await page.locator("//p[@id='rightClickMessage']").allTextContents()
-  ).toContain("You have done a right click");
-
+  await buttons.performRightClick();
+  const rightClickMessage = await buttons.getRightClickMessage();
+  expect(rightClickMessage).toContain(requiredRightClkMessage);
   //Dynamic id buttons  click functionality check
-  // const buttonText = "Click Me";
   // await page.locator(`button:has-text("${buttonText}")`).nth(2).click();  or simple is below
+  await buttons.performDynamicButtonClk();
+  const dynamicClickMessage = await buttons.getDynamicBtnMessage();
   await page.locator("//button[@class='btn btn-primary']").nth(2).click(); // as it is third button
   // you can use nth of last too as it is las button too.
-
-  expect(
-    await page.locator("//p[@id='dynamicClickMessage']").allTextContents()
-  ).toContain("You have done a dynamic click");
+  expect(dynamicClickMessage).toContain(requiredDynamicButtonClkMessage);
+  
 });
 
 ////////////////////// Test and Verify the links there functionality //////////////////
