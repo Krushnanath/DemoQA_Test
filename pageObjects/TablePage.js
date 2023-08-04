@@ -13,6 +13,7 @@ class Table{
         this.salarayInput = page.locator("//input[@id='salary']");
         this.departmentInput = page.locator("//input[@id='department']");
         this.submitButton = page.locator("//button[@id='submit']");
+        this.searchBarInput = page.locator("//input[@id='searchBox']");
 
 
     }
@@ -69,6 +70,37 @@ class Table{
         console.log("Udated Salary : ",updatedSalary);
         return updatedSalary;
 
+    }
+    async clickDeleteButtonOfRecord(recordNumber){
+
+        await this.page.locator(`//span[@id='delete-record-${recordNumber}']`).click();
+    }
+    async addSecondRecord(){
+
+        await this.addRecordButton.click();
+        await this.FirstNameInput.type("TestName");
+        await this.LastNameInput.type("Name");
+        await this.EmailInput.type("testname@test.com");
+        await this.ageInput.type("21");
+        await this.salarayInput.type("50000");
+        await this.departmentInput.type("IT");
+        await this.submitButton.click();
+    }
+    async startSearching(searchValue){
+
+        await this.searchBarInput.type(searchValue, { delay: 200 });
+    }
+    async confirmSearchData(afterSearchFirstColumnData, searchValue){
+
+        let flag = false;
+        afterSearchFirstColumnData.forEach((element) => {
+            if (element.toLowerCase().includes(searchValue)) {
+            flag = true;
+            } else {
+            flag = false;
+            }
+        });
+        return flag;
     }
 }
 module.exports = {Table};

@@ -104,18 +104,18 @@ test("Web Tables Test", async ({ page }) => {
   await expect(mainHeader).toHaveText("Web Tables");
   /// Checking all table first column all data
   const initialFirstColumnData = await tables.getFirstColumnData();
-  console.log("Initial Table Data: ",initialFirstColumnData);
   // Adding new Row to the Table
   await tables.addNewRecord();
   // checking again table data if new value is appered in row
   const afterFirstColumnData = await tables.getFirstColumnData();
+  console.log("Initial Table Data: ",initialFirstColumnData);
   console.log("After add new Record, Table Data: ",afterFirstColumnData);
   expect(initialFirstColumnData.length + 1).toEqual(afterFirstColumnData.length);
 });
 
 ////// Verify table edit functionality  /////////////////////////////////////
 
-test.only("Table Edit Function", async ({ page }) => {
+test("Table Edit Function", async ({ page }) => {
   await page.goto("https://demoqa.com/webtables");
   const tables = new Table(page);
   const mainHeader = await tables.getMainHeader();
@@ -136,146 +136,62 @@ test.only("Table Edit Function", async ({ page }) => {
 });
 
 /////////// Verifying  Delete button functionality  ////////////////////////
-
 test("Table Delete button Functionality", async ({ page }) => {
+  
+  const tables =new Table(page);
   await page.goto("https://demoqa.com/webtables");
 
-  await expect(page.locator(".main-header")).toHaveText("Web Tables");
-
+  const mainHeader = await tables.getMainHeader();
+  await expect(mainHeader).toHaveText("Web Tables");
   /// Checking all table first column all data
-  let tableData = await page
-    .locator(
-      "//div[@class='ReactTable -striped -highlight']//div[@role='row']/div[1]"
-    )
-    .allTextContents();
-  tableData = tableData.filter((item) => item.trim() !== ""); /// removing empty elements
-  tableData.shift(); //// removing fist element as it is header.
-  console.log(tableData);
-
+  const initialFirstColumnData = await tables.getFirstColumnData();
   //adding new row
-  await page.locator("//button[@id='addNewRecordButton']").click();
-  await page.locator("//input[@id='firstName']").type("Test");
-  await page.locator("//input[@id='lastName']").type("Name");
-  await page.locator("//input[@id='userEmail']").type("testname@test.com");
-  await page.locator("//input[@id='age']").type("20");
-  await page.locator("//input[@id='salary']").type("30000");
-  await page.locator("//input[@id='department']").type("Comp");
-  await page.locator("//button[@id='submit']").click();
+  await tables.addNewRecord();
   /// checking again table data if new value is appered in row
-
-  let afterTableData = await page
-    .locator(
-      "//div[@class='ReactTable -striped -highlight']//div[@role='row']/div[1]"
-    )
-    .allTextContents();
-  afterTableData = afterTableData.filter((item) => item.trim() !== "");
-  afterTableData.shift();
-  console.log("After new row add: ", afterTableData);
-
+  const afterFirstColumnData = await tables.getFirstColumnData();
   // finding out the element row number with name Test to be Deleted
-
-  let check = [];
-  let resultRow = 0;
-  for (let i = 1; i <= afterTableData.length; i++) {
-    check = await page
-      .locator(
-        `div.rt-tbody > div.rt-tr-group:nth-child(${i}) > div[role="row"] > div:nth-child(1)`
-      )
-      .allTextContents();
-    if (check[0] == "Test") {
-      resultRow = i;
-      break;
-    }
-  }
-
-  console.log(resultRow);
+  const recordNumber = await tables.findOutRowNum(afterFirstColumnData);
   //clicking on Delete button of respective row:
-
-  await page.locator(`//span[@id='delete-record-${resultRow}']`).click();
-  let afterDeleteTableData = await page
-    .locator(
-      "//div[@class='ReactTable -striped -highlight']//div[@role='row']/div[1]"
-    )
-    .allTextContents();
-  afterDeleteTableData = afterDeleteTableData.filter(
-    (item) => item.trim() !== ""
-  );
-  afterDeleteTableData.shift();
-  console.log("After Delete row added: ", afterDeleteTableData);
-
-  expect(afterDeleteTableData.includes("Test")).toBeFalsy();
-  expect(
-    afterTableData.length - 1 === afterDeleteTableData.length
-  ).toBeTruthy();
+  await tables.clickDeleteButtonOfRecord(recordNumber);
+  const afterDeleteFirstColumnData = await tables.getFirstColumnData();
+  console.log("Intial Table Data: ",initialFirstColumnData);
+  console.log("After Row Addition Table Data: ",afterFirstColumnData);
+  console.log("Record Number to be Deleting: ", recordNumber);
+  console.log("After Delete Record Table Data: ", afterDeleteFirstColumnData);
+  //testing that record with name 'Test' deleted and count of Table record reduced by 1
+  expect(afterDeleteFirstColumnData.includes("Test")).toBeFalsy();
+  expect(afterFirstColumnData.length - 1 === afterDeleteFirstColumnData.length).toBeTruthy();
 });
 
 //////// Test and examine the table serach functionality  /////////////////////
 
-test("Table Search Test", async ({ page }) => {
+test.only("Table Search Test", async ({ page }) => {
+
+  const tables = new Table(page);
   await page.goto("https://demoqa.com/webtables");
 
-  await expect(page.locator(".main-header")).toHaveText("Web Tables");
-
-  /// Checking all table first column all data
-  let tableData = await page
-    .locator(
-      "//div[@class='ReactTable -striped -highlight']//div[@role='row']/div[1]"
-    )
-    .allTextContents();
-  tableData = tableData.filter((item) => item.trim() !== ""); /// removing empty elements
-  tableData.shift(); //// removing fist element as it is header.
-  console.log(tableData);
-
-  //adding new row
-  await page.locator("//button[@id='addNewRecordButton']").click();
-  await page.locator("//input[@id='firstName']").type("Test");
-  await page.locator("//input[@id='lastName']").type("Name");
-  await page.locator("//input[@id='userEmail']").type("testname@test.com");
-  await page.locator("//input[@id='age']").type("20");
-  await page.locator("//input[@id='salary']").type("30000");
-  await page.locator("//input[@id='department']").type("Comp");
-  await page.locator("//button[@id='submit']").click();
-
-  // adding one more row
-  await page.locator("//button[@id='addNewRecordButton']").click();
-  await page.locator("//input[@id='firstName']").type("TestName");
-  await page.locator("//input[@id='lastName']").type("Name");
-  await page.locator("//input[@id='userEmail']").type("testname@test.com");
-  await page.locator("//input[@id='age']").type("21");
-  await page.locator("//input[@id='salary']").type("50000");
-  await page.locator("//input[@id='department']").type("IT");
-  await page.locator("//button[@id='submit']").click();
-
+  const mainHeader = await tables.getMainHeader();
+  await expect(mainHeader).toHaveText("Web Tables");
+  /// Checking  table first column all data
+  const initialFirstColumnData = await tables.getFirstColumnData();
+  //adding new row with name Test
+  await tables.addNewRecord();
+  // adding one more row with name 'TestName
+  await tables.addSecondRecord();
   /// checking again table data if new value is appered in row
-
-  let afterTableData = await page
-    .locator(
-      "//div[@class='ReactTable -striped -highlight']//div[@role='row']/div[1]"
-    )
-    .allTextContents();
-  afterTableData = afterTableData.filter((item) => item.trim() !== "");
-  afterTableData.shift();
-  console.log("After new row add: ", afterTableData);
+  const afterFirstColumnData = await tables.getFirstColumnData();
   ///starting search
+  const searchValue = "test"
+  await tables.startSearching(searchValue);
+  const afterSearchFirstColumnData = await tables.getFirstColumnData();
+  console.log("Initial Table Data: ", initialFirstColumnData);
+  console.log("After records Addition Table Data: ", afterFirstColumnData);
+  console.log("Search Value :",searchValue);
+  console.log("After search table Data : ", afterSearchFirstColumnData);
+  //Testing if table only inclues searchvalue Records
+  const isTableIncluesOnlySeachValue = await tables.confirmSearchData(afterSearchFirstColumnData, searchValue);
+  expect(isTableIncluesOnlySeachValue).toBeTruthy();
 
-  await page.locator("//input[@id='searchBox']").type("test", { delay: 200 });
-  let afterSearchData = await page
-    .locator(
-      "//div[@class='ReactTable -striped -highlight']//div[@role='row']/div[1]"
-    )
-    .allTextContents();
-  afterSearchData = afterSearchData.filter((item) => item.trim() !== "");
-  afterSearchData.shift();
-  console.log("After search : ", afterSearchData);
-  let flag = false;
-  afterSearchData.forEach((element) => {
-    if (element.toLowerCase().includes("test")) {
-      flag = true;
-    } else {
-      flag = false;
-    }
-  });
-  expect(flag).toBeTruthy();
 });
 
 /////// Test and Examine the buttons different clicks functionality  ////////////////////
