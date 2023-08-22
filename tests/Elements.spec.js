@@ -4,7 +4,9 @@ const { CheckBox } = require("../pageObjects/checkBox");
 const { RadioButton } = require("../pageObjects/RadioButton");
 const { Table } = require("../pageObjects/TablePage");
 const { Buttons } = require("../pageObjects/ButtonsPage");
-
+const { Links } = require("../pageObjects/LinksPage");
+const { Images } = require("../pageObjects/ImagePage");
+const { UploadDownloads } = require("../pageObjects/UploadDownloadPage");
 
 test("has title", async ({ page }) => {
   const demoqaPage = new DemoqaPage(page);
@@ -97,7 +99,6 @@ test("Radio Buttons Test", async ({ page }) => {
 ////////////// Verify and examine Web Tables functionality  ////////////////////////
 
 test("Web Tables Test", async ({ page }) => {
-
   const tables = new Table(page);
   const url = "https://demoqa.com/webtables";
   await tables.gotoPage(url);
@@ -109,9 +110,11 @@ test("Web Tables Test", async ({ page }) => {
   await tables.addNewRecord();
   // checking again table data if new value is appered in row
   const afterFirstColumnData = await tables.getFirstColumnData();
-  console.log("Initial Table Data: ",initialFirstColumnData);
-  console.log("After add new Record, Table Data: ",afterFirstColumnData);
-  expect(initialFirstColumnData.length + 1).toEqual(afterFirstColumnData.length);
+  console.log("Initial Table Data: ", initialFirstColumnData);
+  console.log("After add new Record, Table Data: ", afterFirstColumnData);
+  expect(initialFirstColumnData.length + 1).toEqual(
+    afterFirstColumnData.length
+  );
 });
 
 ////// Verify table edit functionality  /////////////////////////////////////
@@ -123,10 +126,10 @@ test("Table Edit Function", async ({ page }) => {
   await expect(mainHeader).toHaveText("Web Tables");
   /// Checking all table first column all data
   const initialFirstColumnData = await tables.getFirstColumnData();
-  console.log("Initial Table Data: ",initialFirstColumnData);
+  console.log("Initial Table Data: ", initialFirstColumnData);
   await tables.addNewRecord();
   const afterFirstColumnData = await tables.getFirstColumnData();
-  console.log("After Row Addingtion: ",afterFirstColumnData);
+  console.log("After Row Addingtion: ", afterFirstColumnData);
   const newSalaray = "50000";
   // we are editing the record with name test finding respective record
   const recordNumber = await tables.findOutRowNum(afterFirstColumnData);
@@ -138,8 +141,7 @@ test("Table Edit Function", async ({ page }) => {
 
 /////////// Verifying  Delete button functionality  ////////////////////////
 test("Table Delete button Functionality", async ({ page }) => {
-  
-  const tables =new Table(page);
+  const tables = new Table(page);
   await page.goto("https://demoqa.com/webtables");
 
   const mainHeader = await tables.getMainHeader();
@@ -155,19 +157,20 @@ test("Table Delete button Functionality", async ({ page }) => {
   //clicking on Delete button of respective row:
   await tables.clickDeleteButtonOfRecord(recordNumber);
   const afterDeleteFirstColumnData = await tables.getFirstColumnData();
-  console.log("Intial Table Data: ",initialFirstColumnData);
-  console.log("After Row Addition Table Data: ",afterFirstColumnData);
+  console.log("Intial Table Data: ", initialFirstColumnData);
+  console.log("After Row Addition Table Data: ", afterFirstColumnData);
   console.log("Record Number to be Deleting: ", recordNumber);
   console.log("After Delete Record Table Data: ", afterDeleteFirstColumnData);
   //testing that record with name 'Test' deleted and count of Table record reduced by 1
   expect(afterDeleteFirstColumnData.includes("Test")).toBeFalsy();
-  expect(afterFirstColumnData.length - 1 === afterDeleteFirstColumnData.length).toBeTruthy();
+  expect(
+    afterFirstColumnData.length - 1 === afterDeleteFirstColumnData.length
+  ).toBeTruthy();
 });
 
 //////// Test and examine the table serach functionality  /////////////////////
 
 test("Table Search Test", async ({ page }) => {
-
   const tables = new Table(page);
   await page.goto("https://demoqa.com/webtables");
 
@@ -182,34 +185,36 @@ test("Table Search Test", async ({ page }) => {
   /// checking again table data if new value is appered in row
   const afterFirstColumnData = await tables.getFirstColumnData();
   ///starting search
-  const searchValue = "test"
+  const searchValue = "test";
   await tables.startSearching(searchValue);
   const afterSearchFirstColumnData = await tables.getFirstColumnData();
   console.log("Initial Table Data: ", initialFirstColumnData);
   console.log("After records Addition Table Data: ", afterFirstColumnData);
-  console.log("Search Value :",searchValue);
+  console.log("Search Value :", searchValue);
   console.log("After search table Data : ", afterSearchFirstColumnData);
   //Testing if table only inclues searchvalue Records
-  const isTableIncluesOnlySeachValue = await tables.confirmSearchData(afterSearchFirstColumnData, searchValue);
+  const isTableIncluesOnlySeachValue = await tables.confirmSearchData(
+    afterSearchFirstColumnData,
+    searchValue
+  );
   expect(isTableIncluesOnlySeachValue).toBeTruthy();
-
 });
 
 /////// Test and Examine the buttons different clicks functionality  ////////////////////
 
-test.only("Button Clicks Test", async ({ page }) => {
+test("Button Clicks Test", async ({ page }) => {
   await page.goto("https://demoqa.com/buttons");
   const buttons = new Buttons(page);
   const requiredDblClickMessage = "You have done a double click";
   const requiredRightClkMessage = "You have done a right click";
-  const requiredDynamicButtonClkMessage = "You have done a dynamic click"
+  const requiredDynamicButtonClkMessage = "You have done a dynamic click";
   const mainHeader = await buttons.getMainHeader();
   //checking we are on right page.
   await expect(mainHeader).toHaveText("Buttons");
   /// checking the doubleClcik functionality.
   await buttons.performDoubleClick();
   const dblClickMessage = await buttons.getdblClickMessage();
-  //checking the message appearred or not 
+  //checking the message appearred or not
   expect(dblClickMessage).toContain(requiredDblClickMessage);
   //cheking right click functionality
   await buttons.performRightClick();
@@ -222,204 +227,86 @@ test.only("Button Clicks Test", async ({ page }) => {
   await page.locator("//button[@class='btn btn-primary']").nth(2).click(); // as it is third button
   // you can use nth of last too as it is las button too.
   expect(dynamicClickMessage).toContain(requiredDynamicButtonClkMessage);
-  
 });
 
 ////////////////////// Test and Verify the links there functionality //////////////////
 
 test("Test the different links functionality", async ({ page }) => {
   await page.goto("https://demoqa.com/links");
-
-  await expect(page.locator(".main-header")).toHaveText("Links");
-
+  const links = new Links(page);
+  const mainHeader = await links.getMainHeader();
+  await expect(mainHeader).toHaveText("Links");
   // tesing simple link that opens new tab
-  // Get the current window.
-  const currentPage = page;
-
-  // Get the promise for the popup event.
-  const page1Promise = page.waitForEvent("popup");
-  // now clicking on the desired link
-  await page.locator("//a[@id='simpleLink']").click();
-  // Get the popup window.
-  const page1 = await page1Promise;
-
-  //checking if the new window tab opened
-  let flag = false;
-  if (currentPage !== page1) {
-    flag = true;
-  } else {
-    flag = false;
-  }
-  expect(flag).toBeTruthy();
-  console.log(currentPage.url(), " and ", page1.url());
+  const isNewWindowOpened = await links.openNewWindowLink();
+  expect(isNewWindowOpened).toBeTruthy();
 
   /// checking links that sends the API call
-
-  // intercept the api call
-  await page.route("**/created", (route) => {
-    route.fulfill({
-      status: 201,
-      // @ts-ignore
-      statusText: "Created",
-    });
-  });
-
-  await page.locator("//a[@id='created']").click();
-  const messageText = await page
-    .locator("//p[@id='linkResponse']")
-    .textContent();
-  expect(messageText).toContain(
-    "Link has responded with staus 201 and status text Created"
-  );
+  const isApiLinkResponded = await links.openApiLink();
+  console.log(isApiLinkResponded);
+  expect(isApiLinkResponded).toBeTruthy();
   // next link to test
   /// below part is neccesory for the creating simulated responce that actual site gives. needed for playwright.
-  await page.route("**/no-content", (route) => {
-    route.fulfill({
-      status: 204,
-      // @ts-ignore
-      statusText: "No Content",
-    });
-  });
-
-  await page.locator("//a[@id='no-content']").click();
-  let message = await page.locator("//p[@id='linkResponse']").textContent();
-  expect(message).toContain(
-    "Link has responded with staus 204 and status text No Content"
-  );
+  const isNoContentLinkResponded = await links.openNoContentLink();
+  expect(isNoContentLinkResponded).toBeTruthy();
 
   /// next link to be checked:
-  await page.route("**/moved", (route) => {
-    route.fulfill({
-      status: 301,
-      // @ts-ignore
-      statusText: "Moved Permanently",
-    });
-  });
-
-  await page.locator("//a[@id='moved']").click();
-  expect(await page.locator("//p[@id='linkResponse']").textContent()).toContain(
-    "Link has responded with staus 301 and status text Moved Permanently"
-  );
+  const isMovedApilinkResponnded = await links.openMovedPermanentlyLink();
+  expect(isMovedApilinkResponnded).toBeTruthy();
 });
 
 //////////////////////////// test and verify Broken link - Images ////////////////////////////
 
 test("Test Broken links and Image", async ({ page }) => {
   await page.goto("https://demoqa.com/broken");
-
+  const images = new Images(page);
+  const mainHeader = await images.getMainHeader();
   // checking we are on right page
-  await expect(page.locator(".main-header")).toHaveText(
-    "Broken Links - Images"
-  );
-  // get all image tags from page
-  const allImages = await page.locator("img");
+  await expect(mainHeader).toEqual("Broken Links - Images");
 
-  // Extract the src attribute from each image element
-  const imageSrcs = await allImages.evaluateAll((elements) => {
-    return elements.map((element) => element.getAttribute("src"));
-  });
-
-  console.log(imageSrcs);
-  // now we are removing the imgages like advertising images
-  const filteredImageSrcs = imageSrcs.filter(
-    // @ts-ignore
-    (element) => !element.includes("ad")
-  );
-  console.log(filteredImageSrcs);
-
-  // we are creating the final url array that we will check one by one for all url
-
-  const baseUrl = "https://demoqa.com";
-  const finalUrls = filteredImageSrcs.map((url) => baseUrl + url);
-  console.log(finalUrls);
-
+  const allImageURL = await images.getAllImageURL();
   //checking if every source of the image working properly by opeing src in new tab
-  const imageResult = [];
-  // Open a new tab for each image source URL
-  for (const element of finalUrls) {
-    let newPage = await page.context().newPage();
+  const isAnyImageBroken = await images.checkImageURL(allImageURL);
 
-    await newPage.goto(element);
-
-    let newPageImage = await newPage.locator("img");
-
-    // Extract the src attribute from each image element for new page
-    let newPageSrc = await newPageImage.evaluateAll((item) => {
-      return item.map((item) => item.getAttribute("src"));
-    });
-    let newPageImageSrcs = newPageSrc.filter(
-      // @ts-ignore
-      (element) => !element.includes("ad")
-    );
-    console.log("New page", newPageImageSrcs);
-    // checking that image src is present in the new tab
-
-    // @ts-ignore
-    if (newPageImageSrcs.some((src) => element.includes(src))) {
-      imageResult.push("true");
-      console.log(element, " is valid image");
-    } else {
-      imageResult.push("false");
-      console.log(element, " is broken image");
-    }
-
-    await newPage.close();
-  }
-  console.log(imageResult);
   // Adding assertion on the all imges
-  imageResult.forEach((element) => {
-    expect(element).toEqual("true");
-  });
+
+  expect(isAnyImageBroken).toBeFalsy();
 });
 
 ////////////////// Check and Verify the Download and upload functionality //////////////
 test("Test Download and upload button", async ({ page }) => {
   await page.goto("https://demoqa.com/upload-download");
 
-  await expect(page.locator(".main-header")).toHaveText("Upload and Download");
+  const upDownloads = new UploadDownloads(page);
+  const mainHeader = await upDownloads.getMainHeader();
+  // checking we are on the right page
+  await expect(mainHeader).toEqual("Upload and Download");
 
-  // Register a download listener to wait for the download to start
-  const downloadPromise = page.waitForEvent("download");
-
-  // Click the download button to trigger the download
-  await page.locator("//a[@id='downloadButton']").click();
-
-  // Wait for the download event to be triggered
-  const download = await downloadPromise;
-
-  // At this point, the download has started
-  // You can add additional assertions here if needed
-
-  // For example, you can check the suggested filename of the download
-  const suggestedFilename = download.suggestedFilename();
-  console.log("Download started with suggested filename:", suggestedFilename);
-
-  // Add an assertion to check if the download has started
-  expect(download).toBeTruthy();
+  //checking if the download starts when we click on the download link
+  const isDownloadStarted = await upDownloads.startDownload();
+  await expect(isDownloadStarted).toBeTruthy();
 });
 
 /////////////////// Test and verify upload file functionality /////////////////
 
-test("Test Upload file functionality", async ({ page }) => {
+test.only("Test Upload file functionality", async ({ page }) => {
   await page.goto("https://demoqa.com/upload-download"); // Replace this with the URL of your website
 
-  const fileInput = await page.locator("//input[@id='uploadFile']");
-  expect(await fileInput.isVisible()).toBe(true);
-  expect(await fileInput.isEnabled()).toBe(true);
+  const uploads = new UploadDownloads(page);
+  const mainHeader = await uploads.getMainHeader();
+  // checking we are on the right page
+  await expect(mainHeader).toEqual("Upload and Download");
+  //checking if the upload input visible and enbled
+  const fileUploadInput = await uploads.getFileInputSection();
+  
+  expect(await fileUploadInput.isVisible()).toBe(true);
+  expect(await fileUploadInput.isEnabled()).toBe(true);
 
   // Set the file path for upload
   const filePath = "c:/Users/krushnath.dhongade/Downloads/sampleFile.JPEG"; // Replace this with the actual file path
-  await page.setInputFiles("//input[@id='uploadFile']", filePath);
-
-  // Wait for the file upload to complete (you may need to adjust the waiting condition based on the behavior of the website)
-  await page.waitForTimeout(5000); // Wait for 5 seconds (adjust as needed)
-
-  // Assert that the file upload is successful (you may need to check for specific changes on the page or some success message)
-  // For example, if there is a success message displayed after the upload, you can use the following assertion:
-  const successMessage = await page.locator("//p[@id='uploadedFilePath']");
-  expect(await successMessage.isVisible()).toBe(true);
+  const isFileUploaded = await uploads.uploadFile(filePath);
+  await expect(isFileUploaded).toBeTruthy();
 });
-
+//***********complted PO */
 ///////////////////// Test and verify Form functionality  //////////////////////////
 
 test("Test Form opertaions", async ({ page }) => {
