@@ -7,6 +7,7 @@ const { Buttons } = require("../pageObjects/ButtonsPage");
 const { Links } = require("../pageObjects/LinksPage");
 const { Images } = require("../pageObjects/ImagePage");
 const { UploadDownloads } = require("../pageObjects/UploadDownloadPage");
+const { Forms } = require("../pageObjects/FormsPage");
 
 test("has title", async ({ page }) => {
   const demoqaPage = new DemoqaPage(page);
@@ -288,7 +289,7 @@ test("Test Download and upload button", async ({ page }) => {
 
 /////////////////// Test and verify upload file functionality /////////////////
 
-test.only("Test Upload file functionality", async ({ page }) => {
+test("Test Upload file functionality", async ({ page }) => {
   await page.goto("https://demoqa.com/upload-download"); // Replace this with the URL of your website
 
   const uploads = new UploadDownloads(page);
@@ -306,109 +307,22 @@ test.only("Test Upload file functionality", async ({ page }) => {
   const isFileUploaded = await uploads.uploadFile(filePath);
   await expect(isFileUploaded).toBeTruthy();
 });
-//***********complted PO */
+
 ///////////////////// Test and verify Form functionality  //////////////////////////
 
 test("Test Form opertaions", async ({ page }) => {
   await page.goto("https://demoqa.com/automation-practice-form");
 
-  await expect(page.locator(".main-header")).toHaveText("Practice Form");
-
-  await page.getByPlaceholder("First Name").click();
-  await page.getByPlaceholder("First Name").fill("Kishan");
-  await page.getByPlaceholder("Last Name").click();
-  await page.getByPlaceholder("Last Name").fill("D");
-  await page.getByPlaceholder("name@example.com").click();
-  await page.getByPlaceholder("name@example.com").fill("Kishan@email.com");
-  await page.getByText("Male", { exact: true }).click();
-  await page.getByPlaceholder("Mobile Number").click();
-  await page.getByPlaceholder("Mobile Number").fill("1234567890");
-  await page.locator("#dateOfBirthInput").click();
-  await page.getByRole("combobox").nth(1).selectOption("1997");
-  await page
-    .locator("div")
-    .filter({
-      hasText:
-        /^JanuaryFebruaryMarchAprilMayJuneJulyAugustSeptemberOctoberNovemberDecember$/,
-    })
-    .getByRole("combobox")
-    .selectOption("3");
-  await page.getByLabel("Choose Friday, April 4th, 1997").click();
-  await page.locator(".subjects-auto-complete__value-container").click();
-  await page.locator("#subjectsInput").fill("m");
-  await page.getByText("Maths", { exact: true }).click();
-  await page.locator("#subjectsInput").fill("ph");
-  await page.getByText("Physics", { exact: true }).click();
-  await page.locator("#subjectsInput").fill("che");
-  await page.getByText("Chemistry", { exact: true }).click();
-  await page.locator("#subjectsInput").fill("en");
-  await page.getByText("English", { exact: true }).click();
-  await page.getByText("Sports").click();
-  await page.getByText("Music").click();
-  const fileInput = await page.locator("//input[@id='uploadPicture']");
-  expect(await fileInput.isVisible()).toBe(true);
-  expect(await fileInput.isEnabled()).toBe(true);
-
-  // Set the file path for upload
-  const filePath = "c:/Users/krushnath.dhongade/Downloads/sampleFile.JPEG"; // Replace this with the actual file path
-  await page.setInputFiles("//input[@id='uploadPicture']", filePath);
-  await page.getByPlaceholder("Current Address").click();
-  await page.getByPlaceholder("Current Address").fill("pune");
-  await page.locator("(//span[contains(@class,'group-header')])[6]").click();
-  await page.locator("//div[@id='state']").click();
-
-  await page.getByText("NCR", { exact: true }).click();
-  await page.locator("//div[@id='city']").click();
-  await page.getByText("Delhi", { exact: true }).click();
-  await page.locator("//button[@id='submit']").click();
+  const forms = new Forms(page);
+  //cheking we are on the right page
+  const mainHeader = await forms.getMainHeader();
+  expect(mainHeader).toEqual("Practice Form");
+  const isformfilled = await forms.fillForm();
+  await expect(isformfilled).toBeTruthy();
   // checking for validation of data entered in form
-
-  await expect(page.locator("//div[@class='modal-header']")).toHaveText(
-    "Thanks for submitting the form"
-  );
-  // creating an array for comparisons for the desired input
-  const input = [
-    "Student Name",
-    "Student Email",
-    "Gender",
-    "Mobile",
-    "Date of Birth",
-    "Subjects",
-    "Hobbies",
-    "Picture",
-    "Address",
-    "State and City",
-  ];
-  const inputValues = [
-    "Kishan D",
-    "Kishan@email.com",
-    "Male",
-    "1234567890",
-    "04 April,1997",
-    "Maths, Physics, Chemistry, English",
-    "Sports, Music",
-    "sampleFile.JPEG",
-    "pune",
-    "NCR Delhi",
-  ];
-
-  // creating an array  for comparison with result data appeared
-  //(//tr[1])//td[1]
-  const resultInput = await page.locator("(//tr)//td[1]").allTextContents();
-  const resultInputValues = await page
-    .locator("(//tr)//td[2]")
-    .allTextContents();
-  console.log("input : ", resultInput, "inputValues : ", resultInputValues);
-
-  // asserting each value for each array comparison
-  const isEqual = JSON.stringify(input) === JSON.stringify(resultInput);
-  console.log(isEqual);
-  console.log(input, resultInput);
-  expect(isEqual).toBeTruthy();
-  //assertion for values entered
-  const isEqualValues =
-    JSON.stringify(inputValues) === JSON.stringify(resultInputValues);
-  console.log(isEqualValues);
-  console.log(inputValues, resultInputValues);
-  expect(isEqualValues).toBeTruthy();
+  const isValidated = await forms.validateFormSubmissionOutput();
+  await expect(isValidated).toBeTruthy();
 });
+
+///////////////////// Test and verify browser window   //////////////////////////
+
