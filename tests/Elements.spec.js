@@ -8,6 +8,7 @@ const { Links } = require("../pageObjects/LinksPage");
 const { Images } = require("../pageObjects/ImagePage");
 const { UploadDownloads } = require("../pageObjects/UploadDownloadPage");
 const { Forms } = require("../pageObjects/FormsPage");
+const { PopupEvents } = require("../pageObjects/PopupEvents");
 
 test("has title", async ({ page }) => {
   const demoqaPage = new DemoqaPage(page);
@@ -326,3 +327,25 @@ test("Test Form opertaions", async ({ page }) => {
 
 ///////////////////// Test and verify browser window   //////////////////////////
 
+test.only("Test Browser window functionality", async({page, browser}) => {
+  
+
+  await page.goto("https://demoqa.com/browser-windows");
+
+  const popupEvents = new PopupEvents(page);
+  // checking we are on the right page
+  const mainHeader = await popupEvents.getMainHeader();
+  await expect(mainHeader).toEqual("Browser Windows");
+
+  // checking if the new tab opended.
+  const isNewTabBtnWorked = await popupEvents.clickBtn('NewTab');
+  expect(isNewTabBtnWorked).toBeTruthy();
+  // checking for new window opened
+  const isNewWindowBtnWorked = await popupEvents.clickBtn('NewWindow');
+  expect(isNewWindowBtnWorked).toBeTruthy();
+  // checking for the new window message
+  const isMsgWindowBtnWorked = await popupEvents.clickBtn('MsgWindow');
+  expect(isMsgWindowBtnWorked).toBeTruthy();
+
+  
+});
